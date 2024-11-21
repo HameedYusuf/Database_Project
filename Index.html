@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Hero</title>
+    <link rel="stylesheet" href="../static/styles.css">
+    <script>
+        async function searchPatients() {
+            const query = document.getElementById("searchQuery").value;
+            const response = await fetch(`http://127.0.0.1:5000/patients/search?query=${query}`);
+            const data = await response.json();
+            const resultsDiv = document.getElementById("results");
+            resultsDiv.innerHTML = JSON.stringify(data, null, 2);
+        }
+
+        async function addPatient() {
+            const patientData = {
+                FirstName: document.getElementById("firstName").value,
+                LastName: document.getElementById("lastName").value,
+                DateOfBirth: document.getElementById("dob").value,
+                Gender: document.getElementById("gender").value,
+                ContactNumber: document.getElementById("contact").value,
+                Email: document.getElementById("email").value,
+                Address: document.getElementById("address").value
+            };
+
+            const response = await fetch("http://127.0.0.1:5000/patients", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(patientData)
+            });
+            const result = await response.json();
+            alert(result.message);
+            fetchAllPatients();
+        }
+
+        async function fetchAllPatients() {
+            const response = await fetch("http://127.0.0.1:5000/patients/search?query=");
+            const data = await response.json();
+            const patientsTable = document.getElementById("patientsTable");
+            patientsTable.innerHTML = `
+                <tr>
+                    <th>Patient ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Actions</th>
+                </tr>
+            `;
+            data.forEach(patient => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${patient[0]}</td>
+                    <td>${patient[1]}</td>
+                    <td>${patient[2]}</td>
+                    <td>
+                        <button onclick="viewPatientHistory(${patient[0]})">View History</button>
+                    </td>
+                `;
+                patientsTable.appendChild(row);
+            });
+        }
+
+        async function viewPatientHistory(patientID) {
+            const response = await fetch(`http://127.0.0.1:5000/patients/${patientID}/history`);
+            const data = await response.json();
+            const historyDiv = document.getElementById("history");
+            historyDiv.innerHTML = `
+                <h3>Patient History (ID: ${patientID})</h3>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+        }
+
+        async function generateReport() {
+            const response = await fetch("http://127.0.0.1:5000/reports/patients-gender");
+            const data = await response.json();
+            const reportDiv = document.getElementById("report");
+            reportDiv.innerHTML = `
+                <h3>Gender Report</h3>
+                <table>
+                    <tr>
+                        <th>Gender</th>
+                        <th>Total</th>
+                    </tr>
+                    ${data.map(row => `<tr><td>${row[0]}</td><td>${row[1]}</td></tr>`).join('')}
+                </table>
+            `;
+        }
+
+        window.onload = fetchAllPatients;
+    </script>
+</head>
+<body>
+    <h1>Health Hero</h1>
+
+    <h2>Search Patients</h2>
+    <input type="text" id="searchQuery" placeholder="Enter patient name">
+    <button onclick="searchPatients()">Search</button>
+    <pre id="results"></pre>
+
+    <h2>Add New Patient</h2>
+    <form onsubmit="addPatient(); return false;">
+        <label>First Name:</label> <input type="text" id="firstName" required><br>
+        <label>Last Name:</label> <input type="text" id="lastName" required><br>
+        <label>Date of Birth:</label> <input type="date" id="dob" required><br>
+        <label>Gender:</label> 
+        <select id="gender" required>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+        </select><br>
+        <label>Contact Number:</label> <input type="text" id="contact" required><br>
+        <label>Email:</label> <input type="email" id="email" required><br>
+        <label>Address:</label> <textarea id="address" required></textarea><br>
+        <button type="submit">Add Patient</button>
+    </form>
+
+    <h2>All Patients</h2>
+    <table id="patientsTable"></table>
+
+    <div id="history"></div>
+
+    <h2>Reports</h2>
+    <button onclick="generateReport()">Generate Gender Report</button>
+    <div id="report"></div>
+</body>
+</html>
