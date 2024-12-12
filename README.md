@@ -1,7 +1,3 @@
-Here’s a **README.md** for your complete project:
-
----
-
 # Health Hero - Patient Health Record System
 
 Health Hero is a simple yet powerful Patient Health Record System designed to manage patient data efficiently. It allows users to store and retrieve patient details, track consultation history, manage diagnoses, medications, and treatment plans, and generate insightful reports.
@@ -61,7 +57,7 @@ HealthHero/
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/yourusername/HealthHero.git
+   git clone https://github.com/HameedYusuf/HealthHero.git
    cd HealthHero
    ```
 
